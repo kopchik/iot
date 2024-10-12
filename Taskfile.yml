@@ -1,0 +1,71 @@
+version: "3"
+
+env:
+  PORT: "/dev/ttyACM0"
+  SOURCES: "*.py"
+  SYNC_FILE: ".sync"
+  ID: "~/.ssh/id_ed25519"
+  SECRET: "config.py"
+
+tasks:
+  run:
+    desc: "Run main.py with `ampy`."
+    cmd: ampy -p /dev/ttyACM0 run ./main.py
+
+  put:
+    desc: "Uploads *.py files (only those that changed) into board. Doesn't recurse."
+    cmds:
+      - if [ ! -c "{{.PORT}}" ]; then echo "cannot find port {{.PORT}} (or it's not a character device)"; exit 1; fi
+      - if [ ! -f "{{.SYNC_FILE}}" ]; then echo "missing sync file, creating one" && touch -d '1966-01-01' "{{.SYNC_FILE}}" ; fi
+      - >
+        find ./ -maxdepth 2 -name "*.py" -newer "{{.SYNC_FILE}}" -print
+        | xargs -r --verbose -I@
+        ampy --port "{{.PORT}}" put @ @
+      - touch "{{.SYNC_FILE}}"
+
+  put-iot:
+    desc: "Puts iot folder into device."
+    cmds:
+      - ampy --port "{{.PORT}}" put iot
+
+  rmrf:
+    desc: removes all files from the board
+    cmds:
+      - rm -f "{{.SYNC_FILE}}"
+      - >
+        for file in `ampy -p "{{.PORT}}" ls`; do
+        echo "deleting $file"
+        ampy -p "{{.PORT}}" rm $file;
+        done
+
+  lint:
+    - ruff check {{.SOURCES}}
+
+  fmt:
+    - isort {{.SOURCES}}
+    - ruff format {{.SOURCES}}
+
+  term: picocom -b 115200 "{{.PORT}}"
+
+  deps:
+    - pip install -r requirements.in
+
+  enc:
+    internal: true
+    cmds:
+      - age -R {{.ID}}.pub -a  -o "{{.SECRET}}.age" "{{.SECRET}}"
+
+  dec:
+    internal: true
+    cmds:
+      - age -d -i {{.ID}} -o "{{.SECRET}}" "{{.SECRET}}.age"
+
+  secret:
+    - defer: rm "{{.SECRET}}"
+    - task: dec
+    - micro "{{.SECRET}}"
+    - ruff check "{{.SECRET}}"
+    - ruff format "{{.SECRET}}"
+    - ampy -p "{{.PORT}}" put "{{.SECRET}}"
+    - task: enc
+
