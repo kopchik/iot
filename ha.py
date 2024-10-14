@@ -15,7 +15,9 @@ class HA:
     date_time_sensor_id: str | None = None
     ha_token: str
 
-    def __init__(self, base_url, ha_token,  outdoor_sensor_id=None, date_time_sensor_id=None):
+    def __init__(
+        self, base_url, ha_token, outdoor_sensor_id=None, date_time_sensor_id=None
+    ):
         self.base_url = base_url
         self.outdoor_sensor_id = outdoor_sensor_id
         self.date_time_sensor_id = date_time_sensor_id
@@ -37,7 +39,7 @@ class HA:
 
         return (ok, state)
 
-    def get_date_time(self) -> tuple[str, str]:
+    def get_local_date_time(self) -> tuple[str, str]:
         if self.date_time_sensor_id is None:
             raise HAError("provide sensor id")
 
@@ -58,3 +60,19 @@ class HA:
 
         temp = result
         return temp
+
+    def get_dusk(self):
+        # TODO: convert to local time:()
+        raw, state = self._query("sensor.sun_next_dawn")
+        import re
+
+        m = re.match("(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).", state)
+
+        year = m.group(1)
+        month = m.group(2)
+        day = m.group(3)
+        hour = int(m.group(4))
+        minute = int(m.group(5))
+        second = m.group(6)
+
+        return

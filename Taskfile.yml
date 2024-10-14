@@ -61,11 +61,12 @@ tasks:
       - age -d -i {{.ID}} -o "{{.SECRET}}" "{{.SECRET}}.age"
 
   secret:
-    - defer: rm "{{.SECRET}}"
-    - task: dec
-    - micro "{{.SECRET}}"
-    - ruff check "{{.SECRET}}"
-    - ruff format "{{.SECRET}}"
-    - ampy -p "{{.PORT}}" put "{{.SECRET}}"
-    - task: enc
-
+    interactive: true
+    cmds:
+      - defer: rm "{{.SECRET}}"
+      - task: dec
+      - micro "{{.SECRET}}"
+      - ruff check "{{.SECRET}}"
+      - ruff format "{{.SECRET}}"
+      - ampy -p "{{.PORT}}" put "{{.SECRET}}"
+      - task: enc
