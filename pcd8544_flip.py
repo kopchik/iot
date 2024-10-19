@@ -4,11 +4,10 @@ from .pcd8544 import PCD8544_FRAMEBUF
 
 
 class LCD(PCD8544_FRAMEBUF):
-    def __init__(self, *args, flipped=False, echo=False, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._flipped = flipped
+    def __init__(self, *args, flip=False, echo=False, **kwargs):
+        self._flip = flip
         self._echo = echo
+        super().__init__(*args, **kwargs)
 
     def log(self, t):
         if self._echo:
@@ -20,7 +19,7 @@ class LCD(PCD8544_FRAMEBUF):
         self.show()
 
     def show(self):
-        if not self._flipped:
+        if not self._flip:
             return super().show()
 
         lcd_data = self.buf

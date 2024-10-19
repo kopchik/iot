@@ -167,9 +167,13 @@ class PCD8544:
 
 class PCD8544_FRAMEBUF(PCD8544):
     def __init__(self, spi, cs, dc, rst=None):
-        super().__init__(spi, cs, dc, rst)
         self.buf = bytearray((HEIGHT // 8) * WIDTH)
         self.fbuf = framebuf.FrameBuffer(self.buf, WIDTH, HEIGHT, framebuf.MONO_VLSB)
+        super().__init__(spi, cs, dc, rst)
+
+    def clear(self):
+        self.fill(0)
+        self.show()
 
     def fill(self, col):
         self.fbuf.fill(col)
