@@ -15,6 +15,7 @@ tasks:
   put:
     desc: "Uploads *.py files (only those that changed) into board. Doesn't recurse."
     cmds:
+      - task: lint
       - if [ ! -c "{{.PORT}}" ]; then echo "cannot find port {{.PORT}} (or it's not a character device)"; exit 1; fi
       - if [ ! -f "{{.SYNC_FILE}}" ]; then echo "missing sync file, creating one" && touch -d '1966-01-01' "{{.SYNC_FILE}}" ; fi
       - >

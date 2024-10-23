@@ -54,11 +54,11 @@ class HA:
         if self.outdoor_sensor_id is None:
             raise HAError("provide sensor id")
 
-        status, result = self._query(self.outdoor_sensor_id)
+        status, raw_temp = self._query(self.outdoor_sensor_id)
         if status != ok:
-            raise HAError(result)
+            raise HAError(raw_temp)
 
-        temp = result
+        temp = float(raw_temp)
         return temp
 
     def get_dusk(self):
