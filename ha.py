@@ -27,14 +27,15 @@ class HA:
         headers = {"Authorization": f"Bearer {self.ha_token}"}
         try:
             r = requests.get(f"{self.base_url}/{sensor_id}", headers=headers)
-        except Exception as err:
-            return (err, f"network: {err}")
+        except Exception as e:
+            return (err, f"network: {e}")
 
         if r.status_code > 299:
             return (err, r.text)
 
         state = r.json()["state"]
         if state == "unavailable":
+            print("UNEXPECtED JSON", r.json())
             return (err, "sensor not available in HA")
 
         return (ok, state)
@@ -68,11 +69,11 @@ class HA:
 
         m = re.match("(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).", state)
 
-        year = m.group(1)
-        month = m.group(2)
-        day = m.group(3)
-        hour = int(m.group(4))
-        minute = int(m.group(5))
-        second = m.group(6)
+        _year = m.group(1)
+        _month = m.group(2)
+        _day = m.group(3)
+        _hour = int(m.group(4))
+        _minute = int(m.group(5))
+        _second = m.group(6)
 
         return
